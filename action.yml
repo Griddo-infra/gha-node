@@ -1,0 +1,49 @@
+name: 'Node de Griddo'
+description: 'Instala la versión de Node acordada para Griddo, la misma en todos los repos.'
+
+inputs:
+  cache:
+    description: 'Gestor de paquetes cuya caché se quiere usar: npm, yarn o pnpm. Vacío: sin caché.'
+    required: false
+    default: ''
+  cache-dependency-path:
+    description: 'Ruta del fichero de dependencias (package-lock.json, yarn.lock…) si no está en la raíz.'
+    required: false
+    default: ''
+  registry-url:
+    description: 'Registro de paquetes para autenticarse, si hace falta.'
+    required: false
+    default: ''
+  scope:
+    description: 'Ámbito del registro (por ejemplo, @griddo).'
+    required: false
+    default: ''
+
+outputs:
+  node-version:
+    description: 'Versión de Node instalada.'
+    value: ${{ steps.node.outputs.node-version }}
+  cache-hit:
+    description: 'Si se ha recuperado la caché de dependencias.'
+    value: ${{ steps.node.outputs.cache-hit }}
+
+runs:
+  using: composite
+  steps:
+    # La versión vive en .node-version, junto a esta action. Se lee aquí porque
+    # setup-node busca node-version-file dentro del repo que llama, no en el de
+    # la action.
+    - name: Versión acordada
+      id: version
+      shell: bash
+      run: echo "version=$(tr -d '[:space:]' < "${GITHUB_ACTION_PATH}/.node-version")" >> "$GITHUB_OUTPUT"
+
+    - name: Instalar Node
+      id: node
+      uses: actions/setup-node@v7
+      with:
+        node-version: ${{ steps.version.outputs.version }}
+        cache: ${{ inputs.cache }}
+        cache-dependency-path: ${{ inputs.cache-dependency-path }}
+        registry-url: ${{ inputs.registry-url }}
+        scope: ${{ inputs.scope }}

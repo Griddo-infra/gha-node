@@ -1,0 +1,13 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["local>Griddo-infra/renovate-config"],
+  "packageRules": [
+    {
+      "description": "La versión de Node se actualiza sola dentro de la mayor fijada: Renovate fusiona su PR si pasan las pruebas. Cambiar de mayor se hace a mano (.node-major y .node-version)",
+      "matchManagers": ["nodenv"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "automerge": true,
+      "automergeType": "pr"
+    }
+  ]
+}

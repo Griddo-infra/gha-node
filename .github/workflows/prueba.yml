@@ -1,0 +1,57 @@
+name: Prueba
+
+# Comprueba, en x64 y en arm64, que la action instala justo la versión de
+# .node-version y que esa versión es de la mayor fijada en .node-major.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  instalar:
+    name: Instalar en ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [ubuntu-24.04, ubuntu-24.04-arm]
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: La versión es de la mayor fijada
+        run: |
+          version=$(tr -d '[:space:]' < .node-version)
+          mayor=$(tr -d '[:space:]' < .node-major)
+          echo "versión ${version}, mayor fijada ${mayor}"
+          [[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "${version%%.*}" == "$mayor" ]]
+
+      - name: Instalar con la action
+        id: node
+        uses: ./
+
+      - name: La versión instalada es la de .node-version
+        env:
+          SALIDA: ${{ steps.node.outputs.node-version }}
+        run: |
+          esperada="v$(tr -d '[:space:]' < .node-version)"
+          instalada=$(node --version)
+          echo "esperada ${esperada}, instalada ${instalada}, salida de la action ${SALIDA}"
+          [[ "$instalada" == "$esperada" ]]
+          [[ "v${SALIDA#v}" == "$esperada" ]]
+
+  # Comprobación única que exige la regla de la rama main.
+  prueba:
+    name: prueba
+    needs: instalar
+    if: always()
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Todas las instalaciones han pasado
+        env:
+          RESULTADO: ${{ needs.instalar.result }}
+        run: '[[ "$RESULTADO" == "success" ]]'
