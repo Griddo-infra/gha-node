@@ -4,6 +4,9 @@ Action que instala **la versión de Node acordada para Griddo**. Todos los repos
 que la usan corren exactamente la misma versión, y esa versión se cambia en un
 solo sitio: este repo.
 
+> [!NOTE]
+> **Versión congelada.** La actualización automática está desactivada y ningún repo usa todavía esta action: está pendiente de acordarse con el equipo de desarrollo. Lo que sigue describe cómo funcionará.
+
 ---
 
 ## 📦 Qué es ##
